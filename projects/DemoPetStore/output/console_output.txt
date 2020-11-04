@@ -1,0 +1,6 @@
+Information of pets with status availabe has been fectched successfully with response code: 200
+New Pet with status as available has been posted successfully with response code is 200
+Pet is avaliable with id: 110011111
+Status of pet with id 110011111 has been updated as sold with response code is 200
+Pet is avaliable with id: 110011111
+Pet has been deleted successfully with response code is: 200
