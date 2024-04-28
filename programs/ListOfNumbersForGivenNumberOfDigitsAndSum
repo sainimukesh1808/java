@@ -1,0 +1,67 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class ListOfNumbersForGivenNumberOfDigitsAndSum {
+  public static List<Integer> getListOfNumbers(int num, int targetSum){
+
+    List<Integer> listOfNums = new ArrayList<>();
+    int start = 10 ;
+    for(int i = 2; i < num; i++){
+      if(num == 1){
+        start = 1;
+        break;
+      }
+      start *= start;
+    }
+
+    int end = start*10 - 1;
+
+
+    for(int i =start; i< end; i++){
+      int tempSum = 0;
+      int tempNum = i;
+      while(tempNum>0){
+        tempSum += tempNum % 10;
+        tempNum = tempNum/10;
+      }
+      if(tempSum == targetSum){
+        listOfNums.add(i);
+      }
+
+    }
+    return  listOfNums;
+
+  }
+
+  public static String getCommon(String[] words){
+    String smallestLengthString = words[0];
+    for(String word : words){
+      if(word.length() < smallestLengthString.length()){
+        smallestLengthString = word;
+      }
+    }
+    String commonString = "";
+
+    for(int i = 0; i < smallestLengthString.length(); i++){
+      boolean flag = true;
+      char c = smallestLengthString.charAt(i);
+      for(String word : words){
+        if(c != word.charAt(i)){
+          flag = false;
+          break;
+        }
+      }
+      if(flag){
+        commonString += c;
+      }
+    }
+    return commonString;
+  }
+  public static void main(String[] a){
+
+    System.out.println(getListOfNumbers(2,3));
+    String[] str = {"Apple", "Application", "Appletools"};
+    System.out.println("getCommon(): " + getCommon(str));
+  }
+
+}
