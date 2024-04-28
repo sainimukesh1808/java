@@ -1,0 +1,142 @@
+import java.util.Arrays;
+import java.util.HashMap;
+
+public class ArraysProgram {
+  public static int[] reverseArray(int[] arr){
+    int left = 0;
+    int right = arr.length - 1;
+    while (left < right){
+      int temp = arr[left];
+      arr[left] = arr[right];
+      arr[right] = temp;
+      left++;
+      right--;
+    }
+    return arr;
+  }
+
+  public static void reverseArray(int[] arr, int start, int end){
+
+    while (start < end){
+      int temp = arr[start];
+      arr[start] = arr[end];
+      arr[end] = temp;
+      start++;
+      end--;
+    }
+  }
+
+  public static int[] reverseArrayInNumberK(int[] arr, int k){
+    for(int i = 0; i < arr.length; i = i+k){
+      //10,11,10,-1,2,100,20,8
+      int upperLimit = Math.min(arr.length-1, i+k-1);
+      reverseArray(arr, i, upperLimit);
+    }
+    return arr;
+  }
+
+  public static int[] indexesOfFirstAndLastNumberOfSubArrayForTargetSum(int[] arr, int sum) throws Exception {
+    if(arr.length == 0){
+      throw new Exception("Please enter valid array");
+    }
+    int currentSum = 0;
+    int end = -1;
+    int start = -1;
+    HashMap<Integer,Integer> map = new HashMap<>();
+    for(int i = 0; i < arr.length ; i++){
+      currentSum += arr[i];
+      // this if block is handling a spacial case when our starting index is 0
+      // and we will don't have any number in map which will be equal to currentSum - sum.
+      if(currentSum - sum == 0){
+        start = 0;
+        end = i;
+        break;
+      }
+      if(map.containsKey(currentSum - sum)){
+        start = map.get(currentSum - sum) + 1;
+        end = i;
+        break;
+      }
+      map.put(currentSum, i);
+    }
+
+    return new int[]{start,end};
+  }
+
+  public static int longestSubArrayForGivenSum(int[] arr, int sum){
+    int longestSubArrayLength = 0;
+    int currentSum = 0;
+    int start = -1;
+    int end = -1;
+    HashMap<Integer,Integer> map = new HashMap<>();
+    for(int i = 0; i < arr.length; i++ ){
+      currentSum += arr[i];
+      if(currentSum - sum == 0){
+        start = 0;
+        end = i;
+        longestSubArrayLength = Math.max(longestSubArrayLength, (end - start) + 1);
+      }
+
+      if(map.containsKey(currentSum - sum)){
+        start = map.get(currentSum - sum) + 1;
+        end = i;
+        longestSubArrayLength = Math.max(longestSubArrayLength, (end - start) + 1);
+      }
+      map.put(currentSum, i);
+    }
+    return longestSubArrayLength;
+  }
+
+  public static int shortestSubArrayForGivenSum(int[] arr, int sum){
+    int shortestSubArrayLength = Integer.MAX_VALUE;
+    int currentSum = 0;
+    int start = -1;
+    int end = -1;
+    HashMap<Integer,Integer> map = new HashMap<>();
+    for(int i = 0; i < arr.length; i++ ){
+      currentSum += arr[i];
+      if(currentSum - sum == 0){
+        start = 0;
+        end = i;
+        shortestSubArrayLength = Math.min(shortestSubArrayLength, (end - start) + 1);
+      }
+
+      if(map.containsKey(currentSum - sum)){
+        start = map.get(currentSum - sum) + 1;
+        end = i;
+        shortestSubArrayLength = Math.min(shortestSubArrayLength, (end - start) + 1);
+      }
+      map.put(currentSum, i);
+    }
+    return shortestSubArrayLength;
+  }
+
+  public static void main(String a[]) throws Exception {
+    int[] arr = {10,11,10,-1,2,100,20,8};
+    System.out.println("Array original: " + Arrays.toString(arr));
+    System.out.println("reverseArray: " + Arrays.toString(reverseArray(arr)));
+
+    arr = new int[]{10, 11, 10, -1, 2, 100, 20, 8};
+    System.out.println("reverseArrayInNumberK: " + Arrays.toString(reverseArrayInNumberK(arr,3)));
+
+    //source: https://www.youtube.com/watch?v=XzwUBIkR9pA
+    arr = new int[]{10, 11, 10, -1, 2, 100, 20, 8};
+                    //currentSum= 10,21,31,30,32,132
+                    //sum = 31
+    int targetSum = 111;
+    System.out.println("indexesOfFirstAndLastNumberOfSubArrayForTargetSum: " + Arrays.toString(indexesOfFirstAndLastNumberOfSubArrayForTargetSum(arr, targetSum)));
+
+    //find longest subarray or shortest subarray for given sum
+    //approach will be exactly same as above with minor changes
+    arr = new int[]{10, 11, 10, -1, 2, 100, 20, 8};
+    System.out.println("longestSubArrayForGivenSum: " +  longestSubArrayForGivenSum(arr, 111));
+    System.out.println("shortestSubArrayForGivenSum: " +  shortestSubArrayForGivenSum(arr, 111));
+
+    //find the largest subarray which has equal number of 0's and 1's.
+    //its mean sum of that array should be highest but with a condition that it should contains equal number of 0's and 1's
+    //[1,0,1,1,0,0,1] --> [1,0,1,1,0,0] --> sum is 3 and length is 6
+    //To solve this problem we will convert all 0's to -1 and will find longest subarray with sum 0.
+    //[1,-1,1,1,-1,-1,1] --> [1,-1,1,1,-1,-1] --> sum is 0 and length is 6
+
+  }
+}
