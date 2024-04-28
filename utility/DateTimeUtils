@@ -1,0 +1,549 @@
+package utils;
+
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.MutableDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+
+public class DateTimeUtils {
+
+  public static final Log log = LogFactory.getLog("seleniumTestSuite");
+
+  private static final Map<String, String> DATE_FORMAT_REGEXPS_US = new HashMap<String, String>() {{
+    put("^\\d{2}/\\d{2}/\\d{4}$", "MM/dd/yyyy");
+    put("^\\d{2}/\\d{2}/\\d{2}$", "MM/dd/yy");
+    put("^\\d{1}/\\d{1}/\\d{2},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "M/d/yy, h:mm a");
+    put("^\\d{1}/\\d{1}/\\d{2},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "M/d/yy, hh:mm a");
+    put("^\\d{1}/\\d{1}/\\d{4},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "M/d/yyyy, h:mm a");
+    put("^\\d{1}/\\d{1}/\\d{4},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "M/d/yyyy, hh:mm a");
+    put("^\\d{1}/\\d{2}/\\d{4},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "M/dd/yyyy, h:mm a");
+    put("^\\d{1}/\\d{2}/\\d{4},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "M/dd/yyyy, hh:mm a");
+    put("^\\d{1}/\\d{2}/\\d{2},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "M/dd/yy, h:mm a");
+    put("^\\d{1}/\\d{2}/\\d{2},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "M/dd/yy, hh:mm a");
+
+    put("^\\d{2}/\\d{1}/\\d{2},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "MM/d/yy, h:mm a");
+    put("^\\d{2}/\\d{1}/\\d{2},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "MM/d/yy, hh:mm a");
+    put("^\\d{2}/\\d{1}/\\d{4},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "MM/d/yyyy, h:mm a");
+    put("^\\d{2}/\\d{1}/\\d{4},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "MM/d/yyyy, hh:mm a");
+    put("^\\d{2}/\\d{2}/\\d{4},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "MM/dd/yyyy, h:mm a");
+    put("^\\d{2}/\\d{2}/\\d{4},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "MM/dd/yyyy, hh:mm a");
+    put("^\\d{2}/\\d{2}/\\d{2},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "MM/dd/yy, h:mm a");
+    put("^\\d{2}/\\d{2}/\\d{2},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "MM/dd/yy, hh:mm a");
+
+    put("^\\d{2}/\\d{2}/\\d{4}\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "MM/dd/yyyy hh:mm a"); //IE11
+    put("^\\d{2}/\\d{2}/\\d{4}\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "MM/dd/yyyy h:mm a"); //IE11
+
+    put("^(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{2},\\s\\d{4},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "MMM dd, yyyy, h:mm a"); // FF, Chrome, IE10
+    put("^(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{2},\\s\\d{4},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "MMM dd, yyyy, hh:mm a"); // FF, Chrome, IE10
+    put("^(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{1},\\s\\d{4},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "MMM d, yyyy, h:mm a"); // FF, Chrome, IE10
+    put("^(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{1},\\s\\d{4},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "MMM d, yyyy, hh:mm a"); // FF, Chrome, IE10
+    put("^(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{2},\\s\\d{4}\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "MMM dd, yyyy h:mm a"); // IE11
+    put("^(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{2},\\s\\d{4}\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "MMM dd, yyyy hh:mm a"); // IE11
+
+    //Stage
+    put("^(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{2},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "MMM dd, h:mm a"); // FF, Chrome
+    put("^(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{2},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "MMM dd, hh:mm a"); // FF, Chrome
+    put("^(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{1},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "MMM d, h:mm a"); // FF, Chrome
+    put("^(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{1},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "MMM d, hh:mm a"); // FF, Chrome
+
+    put("^(?i)(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)," +
+                "\\s(?i)(January|February|March|April|May|June|July|August|September|October|November|December)\\s\\d{2}," +
+                "\\s\\d{4}\\s\\d{1}:\\d{2}:\\d{2}\\s(?i)(am|pm)$", "EEEE, MMMM dd, yyyy h:mm:ss a"); // IE10
+    put("^(?i)(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)," +
+                "\\s(?i)(January|February|March|April|May|June|July|August|September|October|November|December)\\s\\d{2}," +
+                "\\s\\d{4}\\s\\d{2}:\\d{2}:\\d{2}\\s(?i)(am|pm)$", "EEEE, MMMM dd, yyyy hh:mm:ss a"); // IE10
+  }};
+
+  private static final Map<String, String> DATE_FORMAT_REGEXPS_UK = new HashMap<String, String>() {{
+    put("^\\d{2}/\\d{2}/\\d{4}$", "dd/MM/yyyy");
+    put("^\\d{2}/\\d{2}/\\d{2}$", "dd/MM/yy");
+    put("^\\d{1}/\\d{1}/\\d{2},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "d/M/yy, h:mm a");
+    put("^\\d{1}/\\d{1}/\\d{2},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "d/M/yy, hh:mm a");
+    put("^\\d{1}/\\d{1}/\\d{4},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "d/M/yyyy, h:mm a");
+    put("^\\d{1}/\\d{1}/\\d{4},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "d/M/yyyy, hh:mm a");
+    put("^\\d{2}/\\d{1}/\\d{4},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "dd/M/yyyy, h:mm a");
+    put("^\\d{2}/\\d{1}/\\d{4},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "dd/M/yyyy, hh:mm a");
+    put("^\\d{2}/\\d{1}/\\d{2},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "dd/M/yy, h:mm a");
+    put("^\\d{2}/\\d{1}/\\d{2},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "dd/M/yy, hh:mm a");
+
+    put("^\\d{1}/\\d{2}/\\d{2},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "d/MM/yy, h:mm a");
+    put("^\\d{1}/\\d{2}/\\d{2},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "d/MM/yy, hh:mm a");
+    put("^\\d{1}/\\d{2}/\\d{4},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "d/MM/yyyy, h:mm a");
+    put("^\\d{1}/\\d{2}/\\d{4},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "d/MM/yyyy, hh:mm a");
+    put("^\\d{2}/\\d{2}/\\d{4},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "dd/MM/yyyy, h:mm a");
+    put("^\\d{2}/\\d{2}/\\d{4},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "dd/MM/yyyy, hh:mm a");
+    put("^\\d{2}/\\d{2}/\\d{2},\\s\\d{1}:\\d{2}\\s(?i)(am|pm)$", "dd/MM/yy, h:mm a");
+    put("^\\d{2}/\\d{2}/\\d{2},\\s\\d{2}:\\d{2}\\s(?i)(am|pm)$", "dd/MM/yy, hh:mm a");
+    put("^\\d{2}/\\d{2}/\\d{4},\\s\\d{2}:\\d{2}$", "dd/MM/yyyy, hh:mm"); // Chrome, Firefox
+    put("^\\d{2}/\\d{2}/\\d{4},\\s\\d{1}:\\d{2}$", "dd/MM/yyyy, h:mm"); // Chrome, Firefox
+    put("^\\d{2}/\\d{2}/\\d{4}\\s\\d{2}:\\d{2}$", "dd/MM/yyyy hh:mm"); // IE11
+    put("^\\d{2}/\\d{2}/\\d{4}\\s\\d{1}:\\d{2}$", "dd/MM/yyyy h:mm"); // IE11
+
+
+    put("^\\d{2}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{4}\\s\\d{2}:\\d{2}$", "dd MMM yyyy hh:mm"); //IE11
+    put("^\\d{2}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{4}\\s\\d{1}:\\d{2}$", "dd MMM yyyy h:mm"); //IE11
+    put("^\\d{1}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{4}\\s\\d{2}:\\d{2}$", "d MMM yyyy hh:mm"); //IE11
+    put("^\\d{1}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{4}\\s\\d{1}:\\d{2}$", "d MMM yyyy h:mm"); //IE11
+
+    put("^\\d{1}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{4},\\s\\d{2}:\\d{2}$", "d MMM yyyy, hh:mm"); //Chrome, Firefox
+    put("^\\d{1}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{4},\\s\\d{1}:\\d{2}$", "d MMM yyyy, h:mm"); //Chrome, Firefox
+    put("^\\d{2}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{4},\\s\\d{2}:\\d{2}$", "dd MMM yyyy, hh:mm"); //Chrome, Firefox
+    put("^\\d{2}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{4},\\s\\d{1}:\\d{2}$", "dd MMM yyyy, h:mm"); //Chrome, Firefox
+
+    // Stage
+    put("^\\d{2}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{2}:\\d{2}$", "dd MMM hh:mm"); //IE11
+    put("^\\d{2}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\s\\d{2}:\\d{2}$", "dd MMM h:mm"); //IE11
+
+    put("^\\d{1}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec),\\s\\d{2}:\\d{2}$", "d MMM, hh:mm"); //Chrome, Firefox
+    put("^\\d{1}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec),\\s\\d{1}:\\d{2}$", "d MMM, h:mm"); //Chrome, Firefox
+    put("^\\d{2}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec),\\s\\d{2}:\\d{2}$", "dd MMM, hh:mm"); //Chrome, Firefox
+    put("^\\d{2}\\s(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec),\\s\\d{1}:\\d{2}$", "dd MMM, h:mm"); //Chrome, Firefox
+
+    put("^\\d{2}\\s(?i)(January|February|March|April|May|June|July|August|September|October|November|December)\\s" +
+                "\\d{4}\\s\\d{2}:\\d{2}:\\d{2}$", "dd MMMM yyyy hh:mm:ss"); // IE10
+    put("^\\d{2}\\s(?i)(January|February|March|April|May|June|July|August|September|October|November|December)\\s" +
+                "\\d{4}\\s\\d{1}:\\d{2}:\\d{2}$", "dd MMMM yyyy h:mm:ss"); // IE10
+  }};
+
+  public static Timestamp getTimestamp() {
+    java.util.Date date= new java.util.Date();
+    return new Timestamp(date.getTime());
+  }
+
+  public static String getTimestampAsID() {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssSSS");
+    return sdf.format(getTimestamp());
+  }
+
+  public static String getGMTTimestampAsID() {
+    Date currentTime = new Date();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssSSS");
+    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+    return sdf.format(currentTime);
+  }
+
+  public static String getYear() {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+    return sdf.format(getTimestamp());
+  }
+
+  public static String getMonth() {
+    SimpleDateFormat sdf = new SimpleDateFormat("MM");
+    return sdf.format(getTimestamp());
+  }
+
+  /**
+   * Get today's date in usual US simple format MM/dd/yyyy
+   * @return String
+   */
+  public static String getTodaysDateAsString_US() {
+    DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+    Date today = Calendar.getInstance().getTime();
+    return df.format(today);
+  }
+
+  /**
+   * Get earlier date from today in usual US simple format MM/dd/yyyy
+   * @return String
+   */
+  public static String getEarlierDateAsString_US(int num) {
+    Calendar cal  = Calendar.getInstance();
+    cal.add(Calendar.DATE, -num);
+    Date yesterdayDate = new Date(cal.getTimeInMillis());
+    return new SimpleDateFormat("MM/dd/yyyy").format(yesterdayDate);
+  }
+
+  public static String getTodaysDateAsString(String sFormat) {
+	  DateFormat df = new SimpleDateFormat(sFormat);
+	  Date today = Calendar.getInstance().getTime();
+	  return df.format(today);
+  }
+
+  /**
+   * Get today's date in GMT per user given format
+   * @return String
+   */
+  public static String getTodaysDateAsStringInGMT(String sFormat) {
+    Date dt = new Date();
+    SimpleDateFormat dateFormatter = new SimpleDateFormat(sFormat);
+    dateFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+    String strUTCDate = dateFormatter.format(dt);
+    return strUTCDate;
+  }
+
+  /**
+   * Get Browser's date in given dateFormat
+   * @return String
+   */
+  public static String getBrowserDate(WebDriver driver, String dateFormat) {
+    String sBrowserDate = DateTimeUtils.browserDateFormatter(driver, dateFormat);
+    log.debug("Browser Date: " + sBrowserDate);
+    return sBrowserDate;
+  }
+
+  /**
+   * Get tomorrow's date in usual US simple format MM/dd/yyyy
+   * @return String
+   */
+  public static String getTomorrowsDateAsString_US() {
+    return getTomorrowsDateAsString_Other("MM/dd/yyyy");
+  }
+
+  /**
+   * Get tomorrow's date in other format
+   * @param sFormat
+   * @return String
+   */
+  public static String getTomorrowsDateAsString_Other(String sFormat) {
+    DateFormat df = new SimpleDateFormat(sFormat);
+    Date today = Calendar.getInstance().getTime();
+    Date tomorrow = dateAddDays(today, 1);
+    return df.format(tomorrow);
+  }
+    
+  /**
+   * Get future date in usual US simple format MM/dd/yyyy
+   * @return String
+   */
+  public static String getFutureDateAsString_US(int days) {
+	log.debug("getFutureDateAsString_US()");
+    DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+    Date today = Calendar.getInstance().getTime();
+    Date futureDate = dateAddDays(today, days);
+    return df.format(futureDate);
+  }
+  
+  /**
+   * Get future date for specific date format
+   * @param  days - number of days in future
+   * @param {String} dataFormat - date pattern 
+   * @return {String} - formated date
+   */
+  public static String getFutureDateAsString(WebDriver driver, int days, String dateFormat) {
+    log.debug("getFutureDateAsString()");  
+    DateTime dateTime = browserDateTime(driver);
+    dateTime = dateTime.plusDays(days);
+    DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(dateFormat);
+    String formattedDate = dateTime.toString(dateTimeFormatter);
+    return formattedDate;
+  }
+
+  /**
+   * Get future date in usual US simple format MM/dd/yyyy
+   * @return String
+   */
+  public static String getFutureDateAsString_Other(int days, String sFormat) {
+    log.debug("getFutureDateAsString_Other()");
+    DateFormat df = new SimpleDateFormat(sFormat);
+    Date today = Calendar.getInstance().getTime();
+    Date futureDate = dateAddDays(today, days);
+    return df.format(futureDate);
+  }
+
+    /**
+     * Get earlier date from today in other format
+     * @param days
+     * @param sFormat
+     * @return String
+     */
+    public static String getEarlierDateAsString_Other(int days, String sFormat) {
+      log.debug("getEarlierDateAsString_Other()");
+      DateFormat df = new SimpleDateFormat(sFormat);
+      Date today = Calendar.getInstance().getTime();
+      Date futureDate = dateAddDays(today, -days);
+      return df.format(futureDate);
+    }
+
+  public static String getCurrentDateTime(String sFormat) {
+    SimpleDateFormat sdf = new SimpleDateFormat(sFormat);
+    return sdf.format(getTimestamp());
+  }
+
+  public static String getNextYearDateAsString(String sFormat) {
+      DateTimeFormatter sdf = DateTimeFormat.forPattern(sFormat);
+      MutableDateTime date = new MutableDateTime();
+      date.addYears(1);
+      return sdf.print(date);
+  }
+
+  public static String addYearsToCurrentDateString(String sFormat, int years) {
+    DateTimeFormatter sdf = DateTimeFormat.forPattern(sFormat);
+    MutableDateTime date = new MutableDateTime();
+    date.addYears(years);
+    return sdf.print(date);
+  }
+
+  // USE SPARINGLY AND CAREFULLY
+  public static void sleepSecondsAsLastResortBecauseNothingElseWorks(int seconds) {
+    try {
+      log.debug("Sleeping now for " + seconds + " seconds as a last resort because I can't find a better way!");
+      Thread.sleep(seconds * 1000);
+    }
+    catch (InterruptedException e) {
+      log.error("----> InterruptedException in sleepSeconds!", e);
+    }
+  }
+  
+  public static void sleepMilliSecondsAsLastResortBecauseNothingElseWorks(int milliseconds) {
+    try {
+      log.debug("Sleeping now for " + milliseconds + " milliseconds as a last resort because I can't find a better way!");
+      Thread.sleep(milliseconds);
+    }
+    catch (InterruptedException e) {
+      log.error("----> InterruptedException in sleepMillis!", e);
+    }
+  }
+
+  public static Date dateAddDays(Date dt, int numDays) {
+    Calendar c = Calendar.getInstance();
+    c.setTime(dt);
+    c.add(Calendar.DATE, numDays);
+    return c.getTime();
+  }
+
+  /**
+   * Adds the number of days to the given date and converts it to a String in the specified date format
+   * @param date
+   * @param numDays
+   * @param df
+   * @return
+   */
+  public static String dateAddDays(Date date, int numDays, DateFormat df) {
+    return df.format(dateAddDays(date, numDays));
+  }
+
+  /**
+   * This method takes dateAndTime as text and parses it to date, according to provided date format
+   * @param {String} dateAndTime - textual representation of date and time
+   * @param {String} dateFormat - any user defined pattern for date formatting
+   * @return {Date}
+   */
+  public static Date parseDateAndTime(String dateAndTime, String dateFormat) {
+    SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
+    Date date = null;
+    try {
+      date = formatter.parse(dateAndTime);
+    } catch(ParseException e) {
+      log.error("----> ParseException in parseDateAndTime()!", e);
+    }
+    return date;
+  }
+
+  /**
+   * This method takes dateAndTime as text, searches through all supported formats, finds match and parses it to date.
+   * If date time format match is not found, Null pointer exception should be thrown.
+   * If locale is null, then default English-US will be used.
+   * @param dateAndTime - textual representation of date and time
+   * @param locale - currently, two locals are supported (English-US and English-UK)
+   * @return {Date} date if exists
+   */
+  public static Date getDateAndTime(String dateAndTime, String locale) {
+    log.debug("getDateAndTime(" + dateAndTime + ", " + locale + ")");
+    String defaultLocale = "English-US";
+    if (locale == null) {
+      locale = defaultLocale;
+    }
+    try {
+      return parseDateAndTime(dateAndTime, determineDateFormat(dateAndTime,locale));
+    } catch (NullPointerException e) {
+      log.error("----> Unknown date time format." + e);
+    }
+    return null;
+  }
+
+  /**
+   * This method compares only dates. It gets two dates objects and sets all time values (Hour, Minute, Second) to 0
+   * @param {Date} date1
+   * @param {Date} date2
+   * @return True, if dates are the same, no matter on time, false otherwise
+   */
+  public static boolean compareOnlyDates(Date date1, Date date2) {
+    Calendar cal1 = Calendar.getInstance();
+    Calendar cal2 = Calendar.getInstance();
+
+    cal1.setTime(date1);
+    cal2.setTime(date2);
+
+    cal1.set(Calendar.HOUR_OF_DAY, 0);
+    cal1.set(Calendar.MINUTE, 0);
+    cal1.set(Calendar.SECOND, 0);
+    cal2.set(Calendar.HOUR_OF_DAY, 0);
+    cal2.set(Calendar.MINUTE, 0);
+    cal2.set(Calendar.SECOND, 0);
+
+    cal1.set(Calendar.YEAR, 0);
+    cal2.set(Calendar.YEAR, 0);
+
+    return cal1.compareTo(cal2) == 0;
+  }
+
+  /**
+   * Determine SimpleDateFormat pattern matching with the given date string. Returns null if
+   * format is unknown. You can simply extend DateUtil with more formats if needed.
+   * @param dateString The date string to determine the SimpleDateFormat pattern for.
+   * @return The matching SimpleDateFormat pattern, or null if format is unknown.
+   */
+  public static String determineDateFormat(String dateString, String locale) {
+    log.debug("determineDateFormat(" + dateString + ", " + locale + ")");
+    Map<String, String> dateFormatRegexps = null;
+    if (locale.contains("US")) {
+      dateFormatRegexps = DATE_FORMAT_REGEXPS_US;
+    } else if (locale.contains("UK")) {
+      dateFormatRegexps = DATE_FORMAT_REGEXPS_UK;
+    } else {
+      log.error("Unknown locale for the user. Unable to get date.");
+    }
+    for (String regexp : dateFormatRegexps.keySet()) {
+      if (dateString.toLowerCase().matches(regexp)) {
+        return dateFormatRegexps.get(regexp);
+      }
+    }
+    return null; // Unknown format.
+  }
+  
+  
+  /**
+   * Get today's date in desired format from browser
+   * @param {WebDriver} driver, 
+   * @param {String} dateFormat
+   * @return {String} - formatted date 
+   */
+  public static String browserDateFormatter(WebDriver driver, String dateFormat) {
+    DateTime browserDate = browserDateTime(driver);
+    DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(dateFormat);
+    String formattedDate = browserDate.toString(dateTimeFormatter);
+	return formattedDate;
+  }
+
+  /**
+   * Returns the browser's Date & Time with the Timezone Offset set to the browsers offset.
+   * While it's more verbose to pull each parameter from javascript, this is easier to debug later.
+   * @param driver
+   * @return DateTime using the timezone of the browser
+   */
+  public static DateTime browserDateTime(WebDriver driver) {
+    // Return the Browser Date from Javascript
+    JavascriptExecutor js = (JavascriptExecutor) driver;
+    // Extract the browsers date, time and offset from javascript
+    Map<String, Long> date = (Map<String, Long>) js.executeScript("" +
+            "var browserDate = new Date();" +
+            "var _year = browserDate.getFullYear(); " +
+            "var _month = browserDate.getMonth(); " +
+            "var _date = browserDate.getDate(); " +
+            "var _hour = browserDate.getHours(); " +
+            "var _minute = browserDate.getMinutes(); " +
+            "var _second = browserDate.getSeconds(); " +
+            "var _offset = new Date().getTimezoneOffset(); " +
+            "var dateObject = {" +
+            "year:_year," +
+            "month:_month," +
+            "date:_date," +
+            "hour:_hour," +
+            "minute:_minute," +
+            "second:_second," +
+            "offset:_offset" +
+            "};"+
+            "return dateObject; ");
+    // Convert the timezone offset into milliseconds
+    int offsetInMilliseconds = (int) (long) date.get("offset") * 60 * 1000;
+    // Return the DateTimeZone for the browsers location.
+    DateTimeZone timeZone = DateTimeZone.forOffsetMillis(offsetInMilliseconds);
+    // Create a new DateTime object with browsers timezone. JavaScript month is a zero based index so add +1
+    DateTime browserDate = new DateTime(
+            (int) (long) date.get("year"),
+            (int) (long) date.get("month") + 1,
+            (int) (long) date.get("date"),
+            (int) (long) date.get("hour"),
+            (int) (long) date.get("minute"),
+            (int) (long) date.get("second"),
+            timeZone);
+    // Return the browser's DateTime object
+    return browserDate;
+  }
+  
+
+	  /**
+	   Gets time zone offset of specific time zone in format of GMT+/-DD:DD (Ex. GMT-08:00). 
+	   Arguments for zoneID can be found in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+	 * @param zoneID
+	 * @return time zone 
+	 */
+  public static String getSpecificTimezoneOffset(String zoneID) {
+
+	  	TimeZone tz = TimeZone.getTimeZone(zoneID);
+	    Calendar cal = GregorianCalendar.getInstance(tz);
+	    int offsetInMillis = tz.getOffset(cal.getTimeInMillis());
+
+	    String offset = String.format("%02d:%02d", Math.abs(offsetInMillis / 3600000), Math.abs((offsetInMillis / 60000) % 60));
+	    offset = "GMT"+(offsetInMillis >= 0 ? "+" : "-") + offset;
+
+	    return offset;
+	}
+  
+  /**
+	 * Gets Time zone offset off current time zone in format of GMT+/-DD:DD
+	 * @return time zone 
+	 */
+  public static String getCurrentTimezoneOffset() {
+
+	  	TimeZone tz = TimeZone.getDefault();
+	    Calendar cal = GregorianCalendar.getInstance(tz);
+	    int offsetInMillis = tz.getOffset(cal.getTimeInMillis());
+
+	    String offset = String.format("%02d:%02d", Math.abs(offsetInMillis / 3600000), Math.abs((offsetInMillis / 60000) % 60));
+	    offset = "GMT"+(offsetInMillis >= 0 ? "+" : "-") + offset;
+
+	    return offset;
+	}
+
+  public static String getDateAsStringWithFormat(long longDate, String format) {
+    DateTime date = new DateTime(longDate);
+    DateTimeFormatter formatter = DateTimeFormat.forPattern(format);
+    return formatter.print(date);
+  }
+
+  public static Boolean compareDates(String anniversaryDate, String currentDate) {
+    String [] annivYrMonth = anniversaryDate.split("T")[0].split("-");
+    String [] currYrMonth = currentDate.split("T")[0].split("-");
+    if(annivYrMonth[0].equals(currYrMonth[0]) && annivYrMonth[1].equals(currYrMonth[1]))
+    {
+        int annivDate = Integer.parseInt(annivYrMonth[2]);
+        int currDate = Integer.parseInt(currYrMonth[2]);
+        if(annivDate==currDate || Math.abs(annivDate-currDate)==1)
+            return true;
+    }
+    return false;
+  }
+
+  /**
+   * Converts one date format into another
+   * @param sDate
+   * @param sInputDateFormat
+   * @param sOutputDateFormat
+   * @return {String}
+   */
+  public static String convertDatesBetweenFormats(String sDate, String sInputDateFormat, String sOutputDateFormat) throws ParseException {
+    log.debug("convertDatesBetweenFormats(" + sDate + ", " + sInputDateFormat + ", " + sOutputDateFormat + ")");
+    DateFormat sourceDateFormat = new SimpleDateFormat(sInputDateFormat);
+    Date date = sourceDateFormat.parse(sDate);
+    DateFormat outputDateFormat = new SimpleDateFormat(sOutputDateFormat);
+    return outputDateFormat.format(date);
+  }
+
+}
