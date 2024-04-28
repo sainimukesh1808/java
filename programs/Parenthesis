@@ -1,0 +1,47 @@
+import java.util.Arrays;
+import java.util.HashMap;
+
+import java.util.*;
+
+class Parenthesis {
+public static void main(String[] args) {
+  String s1 = "()[]{}";
+  String s2 = "({)}[]";
+
+  if(isValid(s1)) System.out.println(s1 + " has Balanced Parentheses");
+  else System.out.println(s1 + " doesn't have Balanced Parentheses");
+  if(isValid(s2)) System.out.println(s2 + " has Balanced Parentheses");
+  else System.out.println(s2 + " doesn't have Balanced Parentheses");
+}
+
+public static boolean isValid(String s) {
+  Stack<Character> stack = new Stack<>();
+  for(int i =0 ;i < s.length(); i++){
+    char ch = s.charAt(i);
+    if(stack.size() == 0){
+      stack.push(ch);
+      continue;
+    }
+    if(ch == '{' ||ch == '(' ||ch == '['){
+      stack.push(ch);
+    }else{
+      char ch1 = stack.peek();
+      if(ch1 == '(' && ch == ')'){
+        stack.pop();
+      }
+      else if(ch1 == '{' && ch == '}'){
+        stack.pop();
+      }
+      else if(ch1 == '[' && ch == ']'){
+        stack.pop();
+      }else{
+        stack.push(ch);
+      }
+    }
+  }
+  if(stack.size() == 0){
+    return true;
+  }
+    return false;
+}
+}
