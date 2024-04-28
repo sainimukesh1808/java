@@ -1,0 +1,56 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class MaxSubString {
+  public static int maxSubStringWithoutRepetition(String str) throws Exception {
+    if(str.isEmpty()){
+      throw new Exception("String is empty.");
+    }
+    int left = 0;
+    int right = 0;
+    int maxSubArray = 0;
+    List<Character> list = new ArrayList<>();
+    while (right < str.length()){//bab
+      if(!list.contains(str.charAt(right))){
+        list.add(str.charAt(right));
+        right++;
+        maxSubArray = Math.max(maxSubArray, list.size());
+      }else {
+        list.remove(Character.valueOf(str.charAt(left)));
+        left++;
+      }
+    }
+    return maxSubArray;
+  }
+
+  public static int maxSubstringWithRepetition(String str) throws Exception {
+    if(str.isEmpty()){
+      throw new Exception("String is empty");
+    }
+    List<Character> list = new ArrayList<>();
+    list.add(str.charAt(0));
+    int max = 0;
+    int right = 1;
+    while (right < str.length()){
+      if(list.contains(str.charAt(right))){
+        list.add(str.charAt(right));
+        max = Math.max(max, list.size());
+        right++;
+      }else {
+        list.clear();
+        list.add(str.charAt(right));
+        right++;
+      }
+    }
+    return max;
+  }
+
+  public static void main(String[] a) throws Exception {
+    //this is also sliding window approach.
+    String str = "abcdeaa";
+    System.out.println("Length of max sub array: " + maxSubStringWithoutRepetition(str));
+
+    String repeatedCharString = "aaabbccababadddd";
+    System.out.println("Length of max sub array: " + maxSubstringWithRepetition(repeatedCharString));
+  }
+}
