@@ -1,25 +1,37 @@
 public class CountNumberWithUniqueDigits {
 
   public static int countNumberWithUniqueDigits(int n){
-    if(n == 0){
-      return 1;
+    public static void main(String[] args) {
+        int n = 3; // Change this to any digit length (e.g., 2, 3, 4)
+        findUniqueDigitNumbers(n);
     }
-    int ans = 10;// taking value till n=1(0,1,2,3,4,5,6,7,8,9,10)
 
-    while (n>1){
-      int start = 9;
-      int current = 9;
-      for(int i = 1; i < n; i++){//loop will run n-1 time qki agar n=3 hai to 9*9*7 number honge but start*current main first 9 jo ki start hai wo already humne likh diya hau
-        start = start * current--;
-      }
-      ans = ans + start;
-      n--;
+    public static void findUniqueDigitNumbers(int digits) {
+        if (digits <= 0 || digits >= 10) {
+            System.out.println("Only supports digit length between 1 and 9.");
+            return;
+        }
+
+        int start = (int) Math.pow(10, digits - 1);
+        int end = (int) Math.pow(10, digits) - 1;
+
+        for (int num = start; num <= end; num++) {
+            if (hasAllUniqueDigits(num)) {
+                System.out.println(num);
+            }
+        }
     }
-    return ans;
-  }
 
-  public static void main(String a[]){
-    System.out.println("countNumberWithUniqueDigits: " + countNumberWithUniqueDigits(4));
+    public static boolean hasAllUniqueDigits(int num) {
+        boolean[] seen = new boolean[10]; // for digits 0-9
+        while (num > 0) {
+            int digit = num % 10;
+            if (seen[digit]) return false;
+            seen[digit] = true;
+            num /= 10;
+        }
+        return true;
+    
   }
 
 
