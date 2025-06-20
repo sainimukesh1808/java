@@ -5,16 +5,8 @@ public class ListOfNumbersForGivenNumberOfDigitsAndSum {
   public static List<Integer> getListOfNumbers(int num, int targetSum){
 
     List<Integer> listOfNums = new ArrayList<>();
-    int start = 10 ;
-    for(int i = 2; i < num; i++){
-      if(num == 1){
-        start = 1;
-        break;
-      }
-      start *= start;
-    }
-
-    int end = start*10 - 1;
+    int start = Math.pow(10,num-1);
+    int end = Math.pow(10,num) - 1;
 
 
     for(int i =start; i< end; i++){
