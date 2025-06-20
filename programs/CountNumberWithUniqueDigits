@@ -4,6 +4,9 @@ public class CountNumberWithUniqueDigits {
     public static void main(String[] args) {
         int n = 3; // Change this to any digit length (e.g., 2, 3, 4)
         findUniqueDigitNumbers(n);
+        int digits = 3; // try changing to 2, 4, etc.
+        int result = countUniqueDigitNumbers(digits);
+        System.out.println("Total " + digits + "-digit numbers with unique digits: " + result);
     }
 
     public static void findUniqueDigitNumbers(int digits) {
@@ -33,6 +36,15 @@ public class CountNumberWithUniqueDigits {
         return true;
     
   }
+public static int countUniqueDigitNumbers(int digits) {
+        if (digits <= 0 || digits > 10) return 0;
+
+        int count = 9; // first digit can't be 0
+        for (int i = 1; i < digits; i++) {
+            count *= (10 - i); // reduce options for each next digit
+        }
+        return count;
+    }
 
 
 }
