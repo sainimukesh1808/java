@@ -15,11 +15,9 @@ public class MoveAllZerosToRight {
         arr[nonZeroIndex] = arr[right];
         arr[right] = temp;
         nonZeroIndex++;
-        right++;
-      }else {
-        right++;
+        
       }
-
+      right++;
     }
     return arr;
   }
