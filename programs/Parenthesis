@@ -1,47 +1,33 @@
-import java.util.Arrays;
-import java.util.HashMap;
-
-import java.util.*;
+import java.util.Stack;
 
 class Parenthesis {
-public static void main(String[] args) {
-  String s1 = "()[]{}";
-  String s2 = "({)}[]";
+    public static void main(String[] args) {
+        String s1 = "()[]{}";
+        String s2 = "({)}[]";
 
-  if(isValid(s1)) System.out.println(s1 + " has Balanced Parentheses");
-  else System.out.println(s1 + " doesn't have Balanced Parentheses");
-  if(isValid(s2)) System.out.println(s2 + " has Balanced Parentheses");
-  else System.out.println(s2 + " doesn't have Balanced Parentheses");
-}
+        if (isValid(s1)) System.out.println(s1 + " has Balanced Parentheses");
+        else System.out.println(s1 + " doesn't have Balanced Parentheses");
 
-public static boolean isValid(String s) {
-  Stack<Character> stack = new Stack<>();
-  for(int i =0 ;i < s.length(); i++){
-    char ch = s.charAt(i);
-    if(stack.size() == 0){
-      stack.push(ch);
-      continue;
+        if (isValid(s2)) System.out.println(s2 + " has Balanced Parentheses");
+        else System.out.println(s2 + " doesn't have Balanced Parentheses");
     }
-    if(ch == '{' ||ch == '(' ||ch == '['){
-      stack.push(ch);
-    }else{
-      char ch1 = stack.peek();
-      if(ch1 == '(' && ch == ')'){
-        stack.pop();
-      }
-      else if(ch1 == '{' && ch == '}'){
-        stack.pop();
-      }
-      else if(ch1 == '[' && ch == ']'){
-        stack.pop();
-      }else{
-        stack.push(ch);
-      }
+
+    public static boolean isValid(String s) {
+        Stack<Character> stack = new Stack<>();
+        for (char ch : s.toCharArray()) {
+            if (ch == '(' || ch == '{' || ch == '[') {
+                stack.push(ch);
+            } else {
+                if (stack.isEmpty()) return false;
+
+                char top = stack.pop();
+                if ((ch == ')' && top != '(') ||
+                    (ch == '}' && top != '{') ||
+                    (ch == ']' && top != '[')) {
+                    return false;
+                }
+            }
+        }
+        return stack.isEmpty(); // valid only if nothing is left
     }
-  }
-  if(stack.size() == 0){
-    return true;
-  }
-    return false;
-}
 }
