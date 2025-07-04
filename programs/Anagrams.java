@@ -1,3 +1,7 @@
+//Anagrams are words or phrases formed by rearranging the letters of another word or phrase, using all the original letters exactly once.
+//Listen → Silent
+//Elbow → Below
+
 package com.qa.java;
 
 import java.util.ArrayList;
