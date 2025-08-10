@@ -3,46 +3,55 @@ import java.util.List;
 
 public class MaxSubString {
   public static int maxSubStringWithoutRepetition(String str) throws Exception {
-    if(str.isEmpty()){
-      throw new Exception("String is empty.");
-    }
-    int left = 0;
-    int right = 0;
-    int maxSubArray = 0;
-    List<Character> list = new ArrayList<>();
-    while (right < str.length()){//bab
-      if(!list.contains(str.charAt(right))){
-        list.add(str.charAt(right));
-        right++;
-        maxSubArray = Math.max(maxSubArray, list.size());
-      }else {
-        list.remove(Character.valueOf(str.charAt(left)));
-        left++;
-      }
-    }
-    return maxSubArray;
+    if (str == null || str.isEmpty()) {
+            return "";
+        }
+
+        int maxLen = 1, currLen = 1;
+        int maxStart = 0, currStart = 0;
+
+        for (int i = 1; i < str.length(); i++) {
+            if (str.charAt(i) != str.charAt(i - 1)) {
+                currLen++;
+            } else {
+                currLen = 1;
+                currStart = i;
+            }
+
+            if (currLen > maxLen) {
+                maxLen = currLen;
+                maxStart = currStart;
+            }
+        }
+
+        //return str.substring(maxStart, maxStart + maxLen);
+        return maxLen;
   }
 
   public static int maxSubstringWithRepetition(String str) throws Exception {
-    if(str.isEmpty()){
-      throw new Exception("String is empty");
-    }
-    List<Character> list = new ArrayList<>();
-    list.add(str.charAt(0));
-    int max = 0;
-    int right = 1;
-    while (right < str.length()){
-      if(list.contains(str.charAt(right))){
-        list.add(str.charAt(right));
-        max = Math.max(max, list.size());
-        right++;
-      }else {
-        list.clear();
-        list.add(str.charAt(right));
-        right++;
-      }
-    }
-    return max;
+    if (str == null || str.isEmpty()) {
+            return "";
+        }
+
+        int maxLen = 1, currLen = 1;
+        int maxStart = 0, currStart = 0;
+
+        for (int i = 1; i < str.length(); i++) {
+            if (str.charAt(i) == str.charAt(i - 1)) {
+                currLen++;
+            } else {
+                currLen = 1;
+                currStart = i;
+            }
+
+            if (currLen > maxLen) {
+                maxLen = currLen;
+                maxStart = currStart;
+            }
+        }
+
+        //return str.substring(maxStart, maxStart + maxLen);
+        return maxLen;
   }
 
   public static void main(String[] a) throws Exception {
