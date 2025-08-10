@@ -7,23 +7,31 @@ O/P: 2
 */
 package com.qa.java;
 public class leftRightSum {
-		public static void main (String[] args) {
-	    int arr[] = {2,3,1,2,1,5};
-	    int arr_length = arr.length;
-			for(int ele=1;ele<arr_length;ele++){
-	      int l_sum=0;
-	      int r_sum=0;
-	      for(int l_sub_ele=ele-1; l_sub_ele>=0; l_sub_ele--){
-	        l_sum = l_sum + arr[l_sub_ele];
-	      }
-	      for(int r_sub_ele=ele+1; r_sub_ele<arr_length;r_sub_ele++){
-	        r_sum = r_sum + arr[r_sub_ele];
-	      }
-	      
-	      if(r_sum == l_sum){
-	        System.out.println(arr[ele]);
-	      }
-	    }
-		}
+		static void leftRightsum(int[] arr) {
+        //1,0,2,2,0,0,2,2
+        int totalSum = 0;
+        for(int num : arr){
+            totalSum += num;
+        }
+        
+        int leftSum = 0;
+        int rightSum = 0;
+        for(int i =0; i < arr.length;i++){
+            
+            rightSum = totalSum-leftSum-arr[i];
+           
+            if(leftSum == rightSum){
+                System.out.print(i);
+            }
+            leftSum = leftSum + arr[i];
+        }
+        
+    }
+
+    public static void main(String[] args) {
+        int[] a = {2,3,1,2,1,5};
+        leftRightsum(a);
+        
+    }
 	}
 
