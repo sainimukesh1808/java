@@ -2,44 +2,31 @@
 //Listen → Silent
 //Elbow → Below
 
-package com.qa.java;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Anagrams {
-	public static String[] sorted_array(String sortArray[]){
-        int size = sortArray.length;
-        for(int i = 0; i<size-1; i++) {
-         for (int j = i+1; j<size; j++) {
-            if(sortArray[i].compareTo(sortArray[j])>0) {
-               String temp = sortArray[i];
-               sortArray[i] = sortArray[j];
-               sortArray[j] = temp;
-            }
-         }
-        }
-        return sortArray;
-        
-    }
-    
-    public static ArrayList<String> allAnagrams(String anagramsArray[]){
-        ArrayList<String> anagramsListArray = new ArrayList<String>();
-        int len = 6;
-        for(String ele:anagramsArray){
-            if(ele.length()==len){
-                anagramsListArray.add(ele);
-            }
-        }
-        return anagramsListArray;
-    }
-   public static void main(String args[]) {
-      String[] myArray = {"JavaFX", "HBase", "OpenCV", "Java", "Hadoop", "Neo4j"};
-      String sortArray[] = sorted_array(myArray);
-      ArrayList<String> anagramsListArray = allAnagrams(sortArray);
-      System.out.println(Arrays.toString(sortArray));
-      System.out.println(Arrays.toString(anagramsListArray.toArray()));
-   }
 
+    public static boolean isAnagram(String s1, String s2) {
+        // If lengths differ, not an anagram
+        if (s1.length() != s2.length()) {
+            return false;
+        }
 
+        // Convert to char arrays
+        char[] arr1 = s1.toCharArray();
+        char[] arr2 = s2.toCharArray();
+
+        // Sort both arrays
+        Arrays.sort(arr1);
+        Arrays.sort(arr2);
+
+        // Compare sorted arrays
+        return Arrays.equals(arr1, arr2);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(isAnagram("listen", "silent")); // true
+        System.out.println(isAnagram("triangle", "integral")); // true
+        System.out.println(isAnagram("hello", "world")); // false
+    }
 }
