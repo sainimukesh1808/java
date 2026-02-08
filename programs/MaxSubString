@@ -54,6 +54,34 @@ public class MaxSubString {
         return maxLen;
   }
 
+public static int[] longestConsecutiveArray(int a[]) throws Exception {
+		int start = 0;
+		int currentLen = 1;
+		int maxLenght = 1;
+		int maxStart = 0;
+		if(a.length==0) {
+			throw new Exception("Provide valid array");
+		}
+		if(a.length==1) {
+			return a;
+		}
+		for(int i =1; i< a.length; i++) {
+			if(a[i] == a[i-1] +1) {//1 = 
+				currentLen++;
+			}else {
+				currentLen = 1;
+				start = i;
+			}
+			
+			if(currentLen>maxLenght) {
+				maxLenght = currentLen;
+				maxStart = start;
+			}
+		}
+		
+		return Arrays.copyOfRange(a, maxStart, maxStart+maxLenght);
+	}
+
   public static void main(String[] a) throws Exception {
     //this is also sliding window approach.
     String str = "abcdeaa";
@@ -61,5 +89,6 @@ public class MaxSubString {
 
     String repeatedCharString = "aaabbccababadddd";
     System.out.println("Length of max sub array: " + maxSubstringWithRepetition(repeatedCharString));
+    System.out.println(Arrays.toString(longestConsecutiveArray(new int[] {1,2,3,4,5,1,2,3,4,5,6,7,8,9,1,2,3})));
   }
 }
